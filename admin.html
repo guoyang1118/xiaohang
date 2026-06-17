@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>小杭大药房 - 后台管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+body{background:#f5f6fa;color:#1a1a1a;padding-bottom:80px}
+.hd{background:#1a1a1a;color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.hd .logo{font-size:18px;font-weight:700}
+.hd .logout{background:#e63946;color:#fff;border:none;padding:8px 16px;border-radius:20px;cursor:pointer}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #e8e8e8;position:sticky;top:52px;z-index:9;overflow-x:auto}
+.tab{flex:1;text-align:center;padding:14px 8px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;position:relative}
+.tab.active{border-bottom-color:#e63946;color:#e63946;font-weight:600}
+.tab .dot{position:absolute;top:8px;right:8px;width:8px;height:8px;background:#e63946;border-radius:50%;display:none}
+.content{padding:16px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.card h3{margin-bottom:8px;font-size:16px}
+.card p{margin:4px 0;font-size:13px;color:#555}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.badge-pending{background:#fff3cd;color:#856404}
+.badge-shipped{background:#d4edda;color:#155724}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}
+th{color:#888;font-weight:500}
+button{background:#e63946;color:#fff;border:none;padding:6px 14px;border-radius:16px;cursor:pointer;font-size:12px;margin:2px}
+button.green{background:#28a745}
+button.gray{background:#6c757d}
+.empty{text-align:center;padding:40px;color:#999}
+.user-list-item{cursor:pointer;padding:12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:relative}
+.user-list-item:hover{background:#f5f5f5}
+.user-list-item.active{background:#fff5f5;border-left:3px solid #e63946}
+.user-list-item .unread-dot{width:10px;height:10px;background:#e63946;border-radius:50%;display:none}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto;padding:20px}
+.modal-box h3{margin-bottom:16px;text-align:center}
+.chat-container{display:flex;height:calc(100vh - 140px)}
+.chat-users{width:35%;border-right:1px solid #eee;overflow-y:auto;background:#fff}
+.chat-main{width:65%;display:flex;flex-direction:column;background:#fff}
+.chat-main .empty{flex:1;display:flex;align-items:center;justify-content:center;color:#999}
+.chat-header{padding:14px;border-bottom:1px solid #eee;font-weight:600;background:#fafafa;display:flex;align-items:center;gap:8px}
+.chat-header .online-dot{width:8px;height:8px;background:#28a745;border-radius:50%}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;background:#f9f9f9}
+.chat-msg{margin:8px 0;display:flex;flex-direction:column}
+/* from-customer: 客户消息，左边白色 */
+.chat-msg.from-customer{align-items:flex-start}
+.chat-msg.from-customer .bubble{background:#fff;color:#333;border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+/* from-me: 管理员消息，右边红色 */
+.chat-msg.from-me{align-items:flex-end}
+.chat-msg.from-me .bubble{background:#e63946;color:#fff;border-bottom-right-radius:4px}
+.chat-msg .bubble{max-width:70%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
+.chat-msg .time{font-size:10px;color:#999;margin-top:4px}
+.chat-footer{display:flex;padding:12px;border-top:1px solid #eee;gap:8px}
+.chat-footer input{flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:20px;font-size:14px}
+.chat-footer button{background:#e63946;color:#fff;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;font-size:14px}
+.toast{position:fixed;top:20px;right:20px;background:#333;color:#fff;padding:12px 20px;border-radius:8px;z-index:999;display:none;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="hd"><span class="logo">小杭大药房 · 后台管理</span><button class="logout" onclick="logout()">退出</button></div>
+<div class="tabs">
+  <div class="tab active" data-tab="users" onclick="switchAdminTab('users')">用户管理</div>
+  <div class="tab" data-tab="orders" onclick="switchAdminTab('orders')">订单管理</div>
+  <div class="tab" data-tab="chat" onclick="switchAdminTab('chat')">在线客服<span class="dot" id="chatDot"></span></div>
+</div>
+<div class="content" id="adminContent"></div>
+<div class="modal" id="modal" style="display:none" onclick="if(event.target===this)closeModal()"><div class="modal-box" id="modalContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://stellar-queijadas-0cafc5.netlify.app/.netlify/functions/api';
+var adminToken = localStorage.getItem('admin_token')||'';
+var currentChatUser = null;
+var chatRefreshTimer = null;
+var currentTab = 'users';
+var lastMsgIds = {};
+var unreadUsers = {};
+
+setInterval(function(){ if(adminToken) fetch(API+'/admin/heartbeat',{headers:{'x-auth-token':adminToken}}); }, 10000);
+setInterval(function(){ if(adminToken) checkAllNewMessages(); }, 3000);
+
+if(!adminToken){ showLogin(); } else { loadAdminContent(currentTab); }
+
+function showLogin(){
+  document.getElementById('adminContent').innerHTML = '<div class="card" style="max-width:400px;margin:40px auto"><h3>管理员登录</h3><input id="adminUser" placeholder="用户名" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;margin-bottom:10px"><input id="adminPass" type="password" placeholder="密码" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;margin-bottom:10px"><button onclick="adminLogin()" style="width:100%;padding:12px;font-size:14px">登录</button></div>';
+}
+
+function adminLogin(){
+  var u = document.getElementById('adminUser').value;
+  var p = document.getElementById('adminPass').value;
+  fetch(API+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})})
+    .then(function(r){return r.json()})
+    .then(function(res){
+      if(res.token){ adminToken=res.token; localStorage.setItem('admin_token',res.token); loadAdminContent(currentTab); }
+      else { alert('登录失败'); }
+    });
+}
+
+function logout(){ localStorage.removeItem('admin_token'); adminToken=''; if(chatRefreshTimer) clearInterval(chatRefreshTimer); showLogin(); }
+function closeModal(){ document.getElementById('modal').style.display='none'; }
+function openModal(html){ document.getElementById('modalContent').innerHTML=html; document.getElementById('modal').style.display='flex'; }
+function showToast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(function(){t.style.display='none';},3000); }
+
+function switchAdminTab(tab){
+  currentTab=tab;
+  if(tab!=='chat'&&chatRefreshTimer){clearInterval(chatRefreshTimer);chatRefreshTimer=null;}
+  document.querySelectorAll('.tab').forEach(function(el){el.classList.toggle('active',el.dataset.tab===tab)});
+  loadAdminContent(tab);
+}
+
+function loadAdminContent(tab){
+  if(tab==='users') loadUsers();
+  else if(tab==='orders') loadOrders();
+  else if(tab==='chat') loadChatView();
+}
+
+function loadUsers(){
+  fetch(API+'/admin/users',{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(users){
+    var h='<h3>用户列表</h3>';
+    if(!users.length){ document.getElementById('adminContent').innerHTML=h+'<div class="empty">暂无用户</div>'; return; }
+    h+='<table><tr><th>用户名</th><th>密码</th><th>订单数</th><th>操作</th></tr>';
+    users.forEach(function(u){ h+='<tr><td>'+u.username+'</td><td>'+u.password+'</td><td>'+u.orderCount+'</td><td><button onclick="viewUserOrders(\''+u.username+'\')">订单</button><button onclick="viewUserAddresses(\''+u.username+'\')">地址</button></td></tr>'; });
+    h+='</table>';
+    document.getElementById('adminContent').innerHTML=h;
+  });
+}
+
+function viewUserAddresses(username){
+  fetch(API+'/admin/users/'+username+'/addresses',{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(addrs){
+    var h='<h3>'+username+' 的收货地址</h3>';
+    if(!addrs.length) h+='<div class="empty">暂无地址</div>';
+    else addrs.forEach(function(a){ h+='<div class="card"><p><b>姓名：</b>'+a.name+'</p><p><b>电话：</b>'+a.phone+'</p><p><b>地址：</b>'+a.addr+'</p></div>'; });
+    h+='<button onclick="closeModal();loadUsers()">关闭</button>';
+    openModal(h);
+  });
+}
+
+function viewUserOrders(username){
+  fetch(API+'/admin/users/'+username+'/orders',{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(orders){
+    var gn=["愈美片","普瑞巴林胶囊","富马酸喹硫平","阿普唑仑","地分诺酯片","文拉法辛缓释胶囊","右左匹克隆片","唑吡坦片","曲马多片（泰版）","劳拉西泮","复方甘草片","右美沙芬片"];
+    var h='<h3>'+username+' 的订单</h3>';
+    if(!orders.length) h+='<div class="empty">暂无订单</div>';
+    else orders.forEach(function(o){
+      var il=(o.items||'').split(';').map(function(s){var p=s.split(',');return gn[parseInt(p[0])]+' x'+p[2];}).join('、');
+      h+='<div class="card"><p><b>订单号：</b>'+o.orderId+'</p><p><b>商品：</b>'+il+'</p><p><b>金额：</b>¥'+o.price+'</p><p><b>时间：</b>'+o.time+'</p><p><b>状态：</b>'+getStatusBadge(o.status)+' <button class="'+(o.status==='daifahuo'?'green':'gray')+'" onclick="changeOrderStatus(\''+o.orderId+'\',\''+(o.status==='daifahuo'?'yifahuo':'daifahuo')+'\')">'+(o.status==='daifahuo'?'标记已发货':'标记待发货')+'</button></p></div>';
+    });
+    h+='<button onclick="closeModal();loadUsers()">关闭</button>';
+    openModal(h);
+  });
+}
+
+function loadOrders(){
+  fetch(API+'/admin/orders',{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(orders){
+    var gn=["愈美片","普瑞巴林胶囊","富马酸喹硫平","阿普唑仑","地分诺酯片","文拉法辛缓释胶囊","右左匹克隆片","唑吡坦片","曲马多片（泰版）","劳拉西泮","复方甘草片","右美沙芬片"];
+    var h='<h3>所有订单</h3>';
+    if(!orders.length){ document.getElementById('adminContent').innerHTML=h+'<div class="empty">暂无订单</div>'; return; }
+    orders.forEach(function(o){
+      var il=(o.items||'').split(';').map(function(s){var p=s.split(',');return gn[parseInt(p[0])]+' x'+p[2];}).join('、');
+      h+='<div class="card"><p><b>订单号：</b>'+o.orderId+'</p><p><b>用户：</b>'+o.username+'</p><p><b>商品：</b>'+il+'</p><p><b>金额：</b>¥'+o.price+'</p><p><b>时间：</b>'+o.time+'</p><p><b>状态：</b>'+getStatusBadge(o.status)+' <button class="'+(o.status==='daifahuo'?'green':'gray')+'" onclick="changeOrderStatus(\''+o.orderId+'\',\''+(o.status==='daifahuo'?'yifahuo':'daifahuo')+'\')">'+(o.status==='daifahuo'?'标记已发货':'标记待发货')+'</button></p></div>';
+    });
+    document.getElementById('adminContent').innerHTML=h;
+  });
+}
+
+function changeOrderStatus(orderId,newStatus){
+  fetch(API+'/admin/orders/'+orderId+'/status',{method:'PUT',headers:{'Content-Type':'application/json','x-auth-token':adminToken},body:JSON.stringify({status:newStatus})}).then(function(r){return r.json()}).then(function(){ if(currentTab==='orders') loadOrders(); else {closeModal();loadUsers();} });
+}
+
+function getStatusBadge(status){
+  var map={daifahuo:'待发货',yifahuo:'已发货'};
+  return '<span class="badge '+(status==='daifahuo'?'badge-pending':'badge-shipped')+'">'+(map[status]||status)+'</span>';
+}
+
+function loadChatView(){
+  fetch(API+'/admin/users',{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(users){
+    var h='<div class="chat-container"><div class="chat-users" id="chatUserList"><div style="padding:14px;font-weight:600;border-bottom:1px solid #eee;background:#fafafa">用户列表</div>';
+    if(!users.length) h+='<div class="empty">暂无用户</div>';
+    else users.forEach(function(u){
+      h+='<div class="user-list-item'+(currentChatUser===u.username?' active':'')+'" onclick="openChatWith(\''+u.username+'\')" id="user-'+u.username+'"><span>'+u.username+'</span><span class="unread-dot" id="dot-'+u.username+'"></span></div>';
+    });
+    h+='</div><div class="chat-main" id="chatMain"><div class="empty">请选择用户开始聊天</div></div></div>';
+    document.getElementById('adminContent').innerHTML=h;
+    updateUnreadDots();
+    if(currentChatUser) openChatWith(currentChatUser);
+  });
+}
+
+function openChatWith(username){
+  currentChatUser=username;
+  unreadUsers[username]=false;
+  updateUnreadDots();
+  document.querySelectorAll('.user-list-item').forEach(function(el){el.classList.toggle('active',el.textContent.trim().includes(username))});
+  loadChatMessages(username);
+  if(chatRefreshTimer) clearInterval(chatRefreshTimer);
+  chatRefreshTimer=setInterval(function(){ loadChatMessages(username,true); },2000);
+}
+
+function loadChatMessages(username,isRefresh){
+  fetch(API+'/admin/chat/'+username,{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(msgs){
+    var main=document.getElementById('chatMain'); if(!main) return;
+    var inputVal='';
+    if(isRefresh){ var inp=document.getElementById('chatInput'); if(inp&&document.activeElement===inp) return; if(inp) inputVal=inp.value; }
+    var h='<div class="chat-header"><span class="online-dot"></span>'+username+'</div><div class="chat-messages" id="chatMsgs">';
+    if(!msgs.length) h+='<div class="empty">暂无消息，开始聊天吧</div>';
+    else {
+      lastMsgIds[username]=msgs[msgs.length-1].id;
+      msgs.forEach(function(m){
+        // 客户(fromUser=1)在左边白色，管理员(fromUser=0)在右边红色
+        var cls=m.fromUser?'from-customer':'from-me';
+        h+='<div class="chat-msg '+cls+'"><div class="bubble">'+m.message+'</div><div class="time">'+m.time+'</div></div>';
+      });
+    }
+    h+='</div><div class="chat-footer"><input id="chatInput" placeholder="回复 '+username+'..." value="'+inputVal+'"><button onclick="sendAdminMsg(\''+username+'\')">发送</button></div>';
+    main.innerHTML=h; var ma=document.getElementById('chatMsgs'); if(ma) ma.scrollTop=ma.scrollHeight;
+  });
+}
+
+function sendAdminMsg(username){
+  var input=document.getElementById('chatInput'); if(!input) return;
+  var msg=input.value.trim(); if(!msg) return;
+  input.value='';
+  fetch(API+'/admin/chat/send',{method:'POST',headers:{'Content-Type':'application/json','x-auth-token':adminToken},body:JSON.stringify({username:username,message:msg,fromUser:0})}).then(function(r){return r.json()}).then(function(){ loadChatMessages(username); });
+}
+
+function checkAllNewMessages(){
+  fetch(API+'/admin/users',{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(users){
+    users.forEach(function(u){
+      fetch(API+'/admin/chat/'+u.username,{headers:{'x-auth-token':adminToken}}).then(function(r){return r.json()}).then(function(msgs){
+        if(msgs.length){
+          var last=msgs[msgs.length-1];
+          if(last.fromUser && (!lastMsgIds[u.username]||last.id>lastMsgIds[u.username])){
+            lastMsgIds[u.username]=last.id;
+            if(currentChatUser!==u.username){
+              unreadUsers[u.username]=true;
+              updateUnreadDots();
+              showToast(u.username+' 发来新消息');
+            }
+          }
+        }
+      });
+    });
+  });
+}
+
+function updateUnreadDots(){
+  document.querySelectorAll('.unread-dot').forEach(function(el){
+    var un=el.id.replace('dot-','');
+    el.style.display=unreadUsers[un]?'inline-block':'none';
+  });
+  var has=false;
+  for(var k in unreadUsers){ if(unreadUsers[k]) has=true; }
+  var dot=document.getElementById('chatDot');
+  if(dot) dot.style.display=has?'inline-block':'none';
+}
+</script>
+</body>
+</html>

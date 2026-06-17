@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>小杭大药房</title>
+  <style>
+    :root {--p: #e63946;--bg: #f5f6fa;--c: #fff;--t: #1a1a1a;--b: #e8e8e8;--r: 14px;--shadow: 0 2px 16px rgba(0, 0, 0, 0.04);--transition: 0.2s ease;}
+    * {margin: 0;padding: 0;box-sizing: border-box;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;}
+    body {background: var(--bg);color: var(--t);padding-bottom: 140px;-webkit-tap-highlight-color: transparent;line-height: 1.5;letter-spacing: 0.3px;touch-action: manipulation;}
+    .global-loader {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(255,255,255,0.94);backdrop-filter: blur(8px);display: flex;flex-direction: column;align-items: center;justify-content: center;z-index: 9999;transition: opacity 0.4s;opacity: 1;pointer-events: auto;}
+    .global-loader.hidden {opacity: 0;pointer-events: none;}
+    .loader-spinner {width: 48px;height: 48px;border: 4px solid #f0f0f0;border-top: 4px solid var(--p);border-radius: 50%;animation: spin 0.9s linear infinite;margin-bottom: 20px;}
+    @keyframes spin {0% {transform: rotate(0deg);}100% {transform: rotate(360deg);}}
+    .loader-text {color: #555;font-size: 16px;font-weight: 500;letter-spacing: 0.5px;}
+    .lo {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(255,255,255,0.92);display: none;align-items: center;justify-content: center;flex-direction: column;z-index: 998;}
+    .ls {width: 40px;height: 40px;border: 3px solid #eee;border-top: 3px solid var(--p);border-radius: 50%;animation: spin 0.8s linear infinite;}
+    .lt {margin-top: 16px;font-size: 15px;color: #777;letter-spacing: 0.3px;}
+    .hd {background: var(--c);padding: 14px 16px;display: flex;align-items: center;gap: 12px;position: sticky;top: 0;z-index: 10;border-bottom: 1px solid var(--b);box-shadow: 0 1px 8px rgba(0,0,0,0.02);letter-spacing: 0.5px;}
+    .logo {font-size: 21px;font-weight: 700;color: var(--p);letter-spacing: 0.8px;}
+    .sb {flex:1;background:#f5f5f5;border-radius:24px;padding:8px 16px;display:flex;align-items:center;gap:8px;}
+    .sb input {border:none;background:none;outline:none;width:100%;font-size:14px;letter-spacing:0.3px;}
+    .cb {position:relative;cursor:pointer;font-size:20px;padding:4px;}
+    .badge {position:absolute;top:-6px;right:-10px;background:var(--p);color:#fff;border-radius:10px;padding:0 5px;font-size:10px;letter-spacing:0.2px;}
+    .cs {display:flex;gap:10px;padding:12px 16px;overflow-x:auto;}
+    .ct {background:#fff;padding:6px 16px;border-radius:20px;font-size:13px;cursor:pointer;white-space:nowrap;border:1px solid transparent;letter-spacing:0.4px;transition:var(--transition);}
+    .ct.active {background:var(--p);color:#fff;border-color:var(--p);font-weight:500;}
+    .gl {padding:0 16px;}
+    .gi {background:var(--c);border-radius:var(--r);padding:14px;display:flex;gap:14px;margin-bottom:10px;box-shadow:var(--shadow);transition:transform 0.15s;}
+    .gim {width:84px;height:84px;border-radius:10px;background:#f2f2f2;flex-shrink:0;overflow:hidden;}
+    .gim img {width:100%;height:100%;object-fit:cover;}
+    .gif {flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+    .gt {font-size:16px;font-weight:600;letter-spacing:0.4px;}
+    .gp {font-size:19px;color:var(--p);font-weight:700;margin:4px 0;letter-spacing:0.3px;}
+    .gs {font-size:12px;color:#8c8c8c;letter-spacing:0.3px;}
+    .sr {display:flex;flex-wrap:wrap;gap:8px;margin:6px 0;}
+    .st {padding:3px 12px;border:1px solid #ddd;border-radius:14px;font-size:12px;background:#fafafa;cursor:pointer;letter-spacing:0.3px;transition:var(--transition);}
+    .st.active {background:var(--p);color:#fff;border-color:var(--p);}
+    .nb {display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .nbtn {width:30px;height:30px;border:1px solid #ddd;border-radius:50%;background:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555;}
+    .ni {width:44px;height:30px;text-align:center;border:1px solid #ddd;border-radius:14px;font-size:14px;letter-spacing:0.3px;}
+    .acb {background: var(--p);color: #fff;border: none;border-radius: 16px;padding: 4px 14px;font-size: 12px;cursor: pointer;letter-spacing: 0.5px;font-weight: 500;margin-top: 8px;transition: all 0.2s;}
+    .acb:active {opacity: 0.8;transform: scale(0.96);}
+    .acb:disabled {background:#ccc;cursor: not-allowed;}
+    .tb {position:fixed;bottom:0;left:0;right:0;background:var(--c);display:flex;border-top:1px solid var(--b);height:64px;z-index:20;padding-bottom:env(safe-area-inset-bottom);}
+    .ti {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:#999;cursor:pointer;letter-spacing:0.4px;}
+    .ti.active {color:var(--p);font-weight:500;}
+    .pc,.pp {display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:15;overflow-y:auto;padding-bottom:120px;}
+    .ch,.ph {background:var(--c);padding:16px;font-size:17px;font-weight:600;text-align:center;position:sticky;top:0;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;letter-spacing:0.5px;}
+    .cf {position: fixed;bottom: 64px;left: 0;right: 0;background: var(--c);padding: 14px 20px;display: flex;justify-content: space-between;align-items: center;border-top: 1px solid var(--b);}
+    .cf .total-section {display: flex;align-items: baseline;gap: 6px;}
+    .cf .total-label {font-size: 14px;color: #555;letter-spacing: 0.3px;}
+    .cf .total-price {font-size: 18px;font-weight: 700;color: var(--p);letter-spacing: 0.4px;}
+    .ci {background:var(--c);border-radius:12px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+    .uc {background:linear-gradient(135deg,#e63946,#ff6b6b);margin:16px;border-radius:16px;padding:20px;color:#fff;display:flex;align-items:center;gap:14px;}
+    .modal {position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
+    .mb {background:#fff;border-radius:20px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto;padding:20px;animation:modalIn 0.25s ease;}
+    @keyframes modalIn {from {opacity:0;transform:scale(0.95);}to {opacity:1;transform:scale(1);}}
+    .mt {font-size:18px;font-weight:600;margin-bottom:18px;text-align:center;letter-spacing:0.5px;}
+    .if {width:100%;padding:13px 14px;border:1px solid #ddd;border-radius:12px;font-size:15px;margin-bottom:12px;background:#fafafa;letter-spacing:0.4px;}
+    .btn {background: var(--p);color: #fff;border: none;border-radius: 22px;padding: 12px 24px;font-size: 14px;cursor: pointer;font-weight: 500;letter-spacing: 0.6px;transition: all 0.2s;}
+    .btn:active {opacity:0.85;transform:scale(0.98);}
+    .btn:disabled {background:#ccc;cursor: not-allowed;}
+    .bo {background:#fff;color:var(--p);border:1px solid var(--p);}
+    .bb {display:block;width:100%;text-align:center;margin-top:12px;}
+    .ot {padding:6px 14px;border-radius:16px;font-size:13px;background:#f0f0f0;cursor:pointer;white-space:nowrap;letter-spacing:0.3px;}
+    .ot.active {background:var(--p);color:#fff;}
+    .pay {position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:92;text-align:center;padding:40px 20px 100px;display:none;}
+    .pbk {position:fixed;left:20px;top:20px;font-size:16px;padding:8px 14px;background:#fff;border:1px solid #ddd;border-radius:8px;cursor:pointer;}
+    .pt {font-size:18px;margin-bottom:6px;font-weight:500;}
+    .pcd {color:var(--p);font-size:14px;margin-bottom:12px;font-weight:bold;}
+    .pcb {width:260px;height:260px;background:#f2f2f2;margin:0 auto 20px;border-radius:12px;overflow:hidden;}
+    .pcb img {width:100%;height:100%;object-fit:cover;}
+    .ps {font-size:22px;color:var(--p);font-weight:bold;margin-bottom:12px;}
+    .ptip {font-size:14px;color:#666;margin-top:20px;}
+    .psb {background:var(--p);color:#fff;border:none;border-radius:22px;padding:14px 28px;margin-top:20px;cursor:pointer;font-weight:500;letter-spacing:0.5px;}
+    .pw {color:var(--p);font-size:14px;margin-top:12px;font-weight:bold;}
+    .at {display:flex;margin-bottom:20px;}
+    .atab {flex:1;text-align:center;padding:10px;cursor:pointer;border-bottom:2px solid transparent;font-weight:500;}
+    .atab.active {border-bottom-color:var(--p);color:var(--p);}
+    .sf {position:fixed;top:0;left:0;right:0;bottom:0;background:#f5f6fa;z-index:200;display:none;flex-direction:column;}
+    .sh {padding:16px;text-align:center;border-bottom:1px solid #eee;font-weight:600;background:#fff;display:flex;align-items:center;justify-content:space-between;}
+    .sh .status {font-size:12px;color:#999;font-weight:400;}
+    .ca {flex:1;padding:16px;background:#f5f6fa;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+    .system-msg {text-align:center;font-size:13px;margin:8px 0;color:#999;}
+    .msg-bubble {max-width:75%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;position:relative;word-break:break-word;}
+    .msg-user {align-self:flex-end;background:var(--p);color:#fff;border-bottom-right-radius:4px;}
+    .msg-pharmacist {align-self:flex-start;background:#fff;color:#333;border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,0.05);}
+    .cf2 {display:flex;padding:12px;border-top:1px solid #eee;background:#fff;gap:8px;}
+    .cf2 input {flex:1;border:1px solid #eee;border-radius:24px;padding:10px 16px;font-size:14px;}
+    .cf2 button {background:var(--p);color:#fff;border:none;border-radius:24px;padding:10px 20px;font-weight:500;letter-spacing:0.5px;}
+    .fb {display:flex;justify-content:space-between;align-items:center;}
+    .odr {display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
+    .odl {color:#8c8c8c;}
+    .odv {font-weight:500;text-align:right;max-width:60%;}
+    .coupon-item {background: #fff;border: 1px solid #eee;border-radius: 12px;padding: 14px;margin-bottom: 10px;display: flex;justify-content: space-between;align-items: center;cursor: pointer;transition: all 0.2s;}
+    .coupon-item.selected {border-color: var(--p);background: #fff5f5;}
+    .coupon-item.disabled {opacity: 0.5;cursor: not-allowed;}
+    .coupon-left {display: flex;flex-direction: column;}
+    .coupon-name {font-weight: 600;font-size: 15px;}
+    .coupon-condition {font-size: 12px;color: #888;margin-top: 4px;}
+    .coupon-right {color: var(--p);font-weight: 700;font-size: 16px;}
+    .footer-note {text-align: center;padding: 16px;font-size: 12px;color: #999;letter-spacing: 0.3px;}
+  </style>
+</head>
+<body>
+<div class="global-loader" id="globalLoader"><div class="loader-spinner"></div><div class="loader-text">小杭大药房 · 用心筹备中</div></div>
+<div class="lo" id="lo"><div class="ls"></div><div class="lt" id="lt">加载中...</div></div>
+<div class="hd"><span class="logo">小杭大药房</span><div class="sb"><span>&#128269;</span><input id="si" placeholder="搜索药品" oninput="renderGoods()"></div><div class="cb" onclick="switchTab('cart')">&#128722;<span class="badge" id="badge" style="display:none">0</span></div></div>
+<div class="cs"><span class="ct active" data-cat="all" onclick="setCat('all')">全部</span><span class="ct" data-cat="神经" onclick="setCat('神经')">神经类</span><span class="ct" data-cat="呼吸" onclick="setCat('呼吸')">呼吸类</span><span class="ct" data-cat="止痛" onclick="setCat('止痛')">止痛类</span><span class="ct" data-cat="其他" onclick="setCat('其他')">其他</span></div>
+<div class="gl" id="gl"></div>
+<div class="tb"><div class="ti active" onclick="switchTab('home')"><span style="font-size:20px;">&#8962;</span>首页</div><div class="ti" onclick="switchTab('cart')"><span style="font-size:20px;">&#9776;</span>购物车</div><div class="ti" onclick="switchTab('profile')"><span style="font-size:20px;">&#9679;</span>我的</div></div>
+<div class="pc" id="pc"><div class="ch"><span onclick="switchTab('home')" style="cursor:pointer;">&#8592; 返回</span>购物车<span></span></div><div id="cl" style="padding:12px;"></div><div class="cf"><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="sa" onchange="toggleSelectAll()">全选</label><div class="total-section"><span class="total-label">合计：</span><span class="total-price" id="ct">¥0.00</span></div><button class="btn" id="cob" onclick="cartToCheckout()">结算</button></div></div>
+<div class="pp" id="pp"><div class="ph"><span onclick="switchTab('home')">&#8592; 返回</span>我的<span></span></div><div class="uc" id="uca"></div><div style="margin:0 16px;background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;"><div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;" id="otabs"><span class="ot active" data-filter="all" onclick="filterOrders('all')">全部</span><span class="ot" data-filter="daifahuo" onclick="filterOrders('daifahuo')">待发货<span class="badge" id="pb" style="display:none">0</span></span><span class="ot" data-filter="yifahuo" onclick="filterOrders('yifahuo')">待收货</span></div><div id="ol"></div></div><div style="margin:0 16px;background:#fff;border-radius:14px;padding:14px;"><div class="fb" onclick="openAddressManager()">收货地址 <span style="color:#ccc;">&#8250;</span></div><div class="fb" style="margin-top:12px;" onclick="openCoupon()">优惠券 <span style="color:#ccc;">&#8250;</span></div><div class="fb" style="margin-top:12px;" onclick="openService()">联系客服 <span style="color:#ccc;">&#8250;</span></div></div><div class="footer-note">本商城解释权归小杭大药房所属</div></div>
+<div class="modal" id="am"><div class="mb"><div class="at"><div class="atab active" onclick="sat('login')">登录</div><div class="atab" onclick="sat('register')">注册</div></div><div id="lf"><input class="if" id="lu" placeholder="用户名"><input class="if" id="lp" type="password" placeholder="密码"><button class="btn bb" onclick="login()">登录</button></div><div id="rf" style="display:none;"><input class="if" id="ru" placeholder="用户名"><input class="if" id="rp" type="password" placeholder="密码"><input class="if" id="rc" type="password" placeholder="确认密码"><button class="btn bb" onclick="register()">注册</button></div><button class="btn bo bb" onclick="closeModal('am')">取消</button></div></div>
+<div class="modal" id="adm"><div class="mb"><div class="mt">收货地址</div><div id="al"></div><button class="btn bb" onclick="editAddress(-1)">+ 新增地址</button><button class="btn bo bb" onclick="closeModal('adm')">返回</button></div></div>
+<div class="modal" id="aem"><div class="mb"><div class="mt" id="aet">新增地址</div><input class="if" id="en" placeholder="收货人姓名"><input class="if" id="ep" placeholder="手机号码"><textarea class="if" id="ea" placeholder="详细地址" rows="2" style="resize:none;"></textarea><input type="hidden" id="ei" value="-1"><button class="btn bb" onclick="saveAddress()">保存</button><button class="btn bo bb" onclick="closeModal('aem')">取消</button></div></div>
+<div class="modal" id="asm"><div class="mb"><div class="mt">选择收货地址</div><div id="asl"></div><button class="btn bo bb" onclick="closeModal('asm')">取消</button></div></div>
+<div class="modal" id="cm"><div class="mb"><div class="mt">优惠券</div><div id="cpl"></div><button class="btn bo bb" onclick="closeModal('cm')">关闭</button></div></div>
+<div class="modal" id="rm"><div class="mb"><div class="mt">购药风险告知与须知</div><div style="font-size:14px;line-height:1.8;margin-bottom:16px;letter-spacing:0.3px;"><p>1. 本次购买药品均为个人自用，严禁转售、贩卖及用于其他非法用途。</p><p>2. 购买前请确认自身无药物过敏、无相关禁忌症，遵医嘱或说明书使用。</p><p>3. 未成年人、孕妇、哺乳期女性及重大疾病患者请谨慎购买，建议咨询专业医师。</p><p>4. 药品为特殊商品，无质量问题概不退换，请确认需求后再提交订单。</p><p>5. 本人承诺所填收货信息真实有效，自愿承担购药及使用过程中的全部责任。</p><p>6. 如违反上述声明，一切法律后果由本人自行承担。</p></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><input type="checkbox" id="rcb"><label>我已阅读并同意以上购药风险告知与须知</label></div><div style="display:flex;gap:12px;"><button class="btn bo" style="flex:1;" onclick="closeModal('rm')">取消</button><button class="btn" style="flex:1;" onclick="toPayAfterRisk()">下一步</button></div></div></div>
+<div class="pay" id="pay"><button class="pbk" onclick="closePay()">返回</button><div class="pt">请使用支付宝扫码付款</div><div class="pcd" id="cdt">支付倒计时：30:00</div><div class="pcb"><img src="https://bee-reg-ab.imagency.cn/e/e02ed2fdd422e54570d5206d88ea1d28.png" alt="支付宝收款码"></div><div class="ps" id="fp">¥0.00</div><div class="ptip">发货后会将快递单号发送至你的手机号短信</div><button class="psb" id="payConfirmBtn" onclick="checkPayment()">已完成支付</button><div class="pw">未付款请勿点击</div></div>
+<div class="modal" id="sp" style="display:none;align-items:center;justify-content:center;flex-direction:column;background:#fff;"><div style="font-size:50px;color:var(--p);">&#10003;</div><div style="font-size:20px;font-weight:bold;margin:12px 0;">支付成功</div><div id="soi" style="color:#666;"></div><button class="btn" onclick="backToHome()">返回首页</button></div>
+<div class="modal" id="odm"><div class="mb"><div class="mt">订单详情</div><div class="odr"><span class="odl">订单编号</span><span class="odv" id="did"></span></div><div class="odr"><span class="odl">商品</span><span class="odv" id="dg"></span></div><div class="odr"><span class="odl">金额</span><span class="odv" id="dp"></span></div><div class="odr"><span class="odl">状态</span><span class="odv" id="ds"></span></div><div class="odr"><span class="odl">下单时间</span><span class="odv" id="dt"></span></div><button class="btn bo bb" onclick="closeModal('odm')">关闭</button></div></div>
+<div class="sf" id="sf">
+  <div class="sh">
+    <span onclick="closeService()" style="cursor:pointer;">&#8592; 返回</span>
+    <span>在线药师咨询</span>
+    <span class="status" id="chatStatus">药师离线</span>
+  </div>
+  <div class="ca" id="ca">
+    <div class="system-msg">药师离线，您可以留言</div>
+  </div>
+  <div class="cf2">
+    <input type="text" id="cinput" placeholder="输入您的问题...">
+    <button onclick="sendMsg()">发送</button>
+  </div>
+</div>
+<script>
+(function() { setTimeout(function() { var l = document.getElementById('globalLoader'); if(l) l.classList.add('hidden'); }, 1500); })();
+
+const API = 'https://stellar-queijadas-0cafc5.netlify.app/.netlify/functions/api';
+var cu=localStorage.getItem('username')||null;
+var goodsNames = ["愈美片","普瑞巴林胶囊","富马酸喹硫平","阿普唑仑","地分诺酯片","文拉法辛缓释胶囊","右左匹克隆片","唑吡坦片","曲马多片（泰版）","劳拉西泮","复方甘草片","右美沙芬片"];
+var statusMap = {daifahuo:'待发货',yifahuo:'已发货'};
+var chatPollTimer = null;
+
+async function syncServer(){
+  var token=localStorage.getItem('token');
+  if(!token) return;
+  cart=(await fetch(API+'/cart',{headers:{'x-auth-token':token}}).then(function(r){return r.json()}))||[];
+  addresses=(await fetch(API+'/address',{headers:{'x-auth-token':token}}).then(function(r){return r.json()}))||[];
+  orders=(await fetch(API+'/orders',{headers:{'x-auth-token':token}}).then(function(r){return r.json()}))||[];
+  ucb();
+}
+
+function sat(tab){ document.querySelectorAll('.atab').forEach(function(el){el.classList.remove('active')}); document.querySelector('.atab[onclick="sat(\''+tab+'\')"]').classList.add('active'); document.getElementById('lf').style.display=tab==='login'?'block':'none'; document.getElementById('rf').style.display=tab==='register'?'block':'none'; }
+
+async function login(){
+  var u=document.getElementById('lu').value.trim(); var p=document.getElementById('lp').value.trim();
+  if(!u||!p){ st('请填写完整'); return; }
+  var res=await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})}).then(function(r){return r.json()});
+  if(res.msg) return st(res.msg==='cuowu'?'用户名或密码错误':res.msg);
+  cu=res.username; localStorage.setItem('token',res.token); localStorage.setItem('username',cu);
+  closeModal('am'); await syncServer(); ual(); st('登录成功');
+}
+
+async function register(){
+  var u=document.getElementById('ru').value.trim(); var p=document.getElementById('rp').value.trim(); var c=document.getElementById('rc').value.trim();
+  if(!u||!p||!c){ st('请填写完整'); return; } if(p!==c){ st('两次密码不一致'); return; }
+  var res=await fetch(API+'/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})}).then(function(r){return r.json()});
+  if(res.msg) return st(res.msg==='yicunzai'?'用户名已存在':res.msg);
+  cu=res.username; localStorage.setItem('token',res.token); localStorage.setItem('username',cu);
+  closeModal('am'); await syncServer(); ual(); st('注册成功，已自动登录');
+}
+
+function logout(){ if(confirm('确定退出登录？')){ cu=null; cart=[]; addresses=[]; orders=[]; localStorage.removeItem('token'); localStorage.removeItem('username'); ual(); st('已退出登录'); } }
+
+function ual(){ ucb(); upu(); if(document.getElementById('pc').style.display==='block') renderCart(); if(document.getElementById('pp').style.display==='block') renderOrders(); }
+function upu(){ var area=document.getElementById('uca'); if(cu){ area.innerHTML='<div style="display:flex;align-items:center;gap:14px;flex:1;"><div style="width:50px;height:50px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">'+cu.charAt(0).toUpperCase()+'</div><div><div style="font-size:18px;font-weight:bold;">'+cu+'</div><div style="font-size:13px;opacity:0.8;">已登录</div></div></div><span onclick="logout()" style="cursor:pointer;text-decoration:underline;font-size:14px;">退出</span>'; } else { area.innerHTML='<div style="text-align:center;width:100%;" onclick="openModal(\'am\')"><div style="font-size:18px;font-weight:bold;">登录 / 注册</div><div style="font-size:13px;opacity:0.8;">点击登录享受更多服务</div></div>'; } }
+
+function st(msg){ var d=document.createElement('div'); d.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:16px 24px;border-radius:12px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.2);'; d.innerText=msg; document.body.appendChild(d); setTimeout(function(){d.remove()},1500); }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+function openModal(id){ document.getElementById(id).style.display='flex'; }
+
+var slTimer = null;
+function hideLoader(){ document.getElementById('lo').style.display='none'; if(slTimer){ clearTimeout(slTimer); slTimer=null; } }
+function sl(text, cb, dur){ hideLoader(); text=text||'加载中...'; document.getElementById('lt').innerText=text; document.getElementById('lo').style.display='flex'; var time=dur||(Math.floor(Math.random()*800)+700); slTimer=setTimeout(function(){ document.getElementById('lo').style.display='none'; slTimer=null; if(cb) cb(); }, time); }
+
+var goods=[{name:"愈美片",price:25,stock:218,pic:"https://bee-reg-ab.imagency.cn/e/366b9c9d8f641f77544bd3de69babd4b.jpeg",cat:"呼吸"},{name:"普瑞巴林胶囊",stock:230,pic:"https://bee-reg-ab.imagency.cn/e/487993adbcb328f37a2593e277df660b.jpeg",specs:[{name:"75毫克",price:40},{name:"150毫克",price:45}],defSpec:1,cat:"神经"},{name:"富马酸喹硫平",price:20,stock:500,pic:"https://bee-reg-ab.imagency.cn/e/0b7173f547dc33b072d40ed13c810316.jpeg",cat:"神经"},{name:"阿普唑仑",price:50,stock:63,pic:"https://bee-reg-ab.imagency.cn/e/9aa8f9fe62536560b36150c77c5b2877.jpeg",cat:"神经"},{name:"地分诺酯片",price:135,stock:30,pic:"https://bee-reg-ab.imagency.cn/e/d1dc31c541e26a3d3023e1d51e7a6e02.jpeg",cat:"止痛"},{name:"文拉法辛缓释胶囊",price:40,stock:132,pic:"https://bee-reg-ab.imagency.cn/e/4e26b3d389ef56f5212b40136894f9ab.jpeg",cat:"神经"},{name:"右左匹克隆片",price:50,stock:36,pic:"https://bee-reg-ab.imagency.cn/e/85dc15156d620e448dfe4fd19ba8b184.jpeg",cat:"其他"},{name:"唑吡坦片",price:75,stock:137,pic:"https://bee-reg-ab.imagency.cn/e/af881de53425fbf7d1a13a2522488ab4.jpeg",cat:"其他"},{name:"曲马多片（泰版）",price:68,stock:91,pic:"https://bee-reg-ab.imagency.cn/e/3d73ded504c07c9359c8315e5bce99eb.jpeg",cat:"止痛"},{name:"劳拉西泮",price:50,stock:118,pic:"https://bee-reg-ab.imagency.cn/e/2f170d093c6db6e28b8f41bb8f7a45a2.jpeg",cat:"神经"},{name:"复方甘草片",price:65,stock:166,pic:"https://bee-reg-ab.imagency.cn/e/33edd9cfb84e1296a7802d77c5979055.jpeg",cat:"呼吸"},{name:"右美沙芬片",price:80,stock:0,pic:"https://picsum.photos/80/80",cat:"呼吸"}];
+var cart=[], addresses=[], orders=[], curCat='all', curFilter='all', checkItems=[], selCoupon=null, payTimer=null, paymentAttempt=0;
+
+var couponList = [{ id: 1, name: '满100减5', discount: 5, min: 100 },{ id: 2, name: '满200减12', discount: 12, min: 200 },{ id: 3, name: '满500减28', discount: 28, min: 500 }];
+
+function getPrice(i,spec){ var g=goods[i]; return g.specs?g.specs[spec||g.defSpec||0].price:g.price; }
+function getSpecName(i,spec){ var g=goods[i]; if(!g.specs) return ''; return g.specs[spec||g.defSpec||0].name; }
+function ucb(){ var t=0; cart.forEach(function(c){t+=c.quantity||0}); var b=document.getElementById('badge'); b.innerText=t; b.style.display=t>0?'inline':'none'; }
+function setCat(cat){ curCat=cat; document.querySelectorAll('.ct').forEach(function(el){el.classList.toggle('active',el.dataset.cat===cat)}); renderGoods(); }
+function switchSpec(i, specIdx, event){ if(event) event.stopPropagation(); var container = document.getElementById('in'+i)?.closest('.gi'); if(!container) return; var tags = container.querySelectorAll('.st'); tags.forEach(function(tag, idx){ tag.classList.toggle('active', idx === specIdx); }); var priceEl = container.querySelector('.gp'); if(priceEl && goods[i].specs){ priceEl.textContent = '¥' + goods[i].specs[specIdx].price.toFixed(2); } }
+function getSelectedSpec(i){ var container = document.getElementById('in'+i)?.closest('.gi'); if(!container || !goods[i].specs) return goods[i].defSpec || 0; var tags = container.querySelectorAll('.st'); var selectedIdx = goods[i].defSpec || 0; tags.forEach(function(tag, idx){ if(tag.classList.contains('active')) selectedIdx = idx; }); return selectedIdx; }
+function renderGoods(){ var q=document.getElementById('si').value.toLowerCase(); var h=''; goods.forEach(function(g,i){ if(curCat!=='all'&&g.cat!==curCat) return; if(q&&g.name.toLowerCase().indexOf(q)===-1) return; var defSpec = g.defSpec || 0; var p=getPrice(i, defSpec); h+='<div class="gi"><div class="gim"><img src="'+g.pic+'" alt="'+g.name+'"></div><div class="gif"><div class="gt">'+g.name+'</div><div class="gp">¥'+p.toFixed(2)+'</div><div class="gs">'+(g.stock>0?'库存 '+g.stock:'已售罄')+'</div>'; if(g.specs){ h+='<div class="sr">'; g.specs.forEach(function(s,si){ h+='<span class="st'+(si===defSpec?' active':'')+'" onclick="switchSpec('+i+','+si+',event)">'+s.name+'</span>'; }); h+='</div>'; } h+='<div class="nb"><div class="nbtn" onclick="changeItemNum('+i+',-1)">-</div><input class="ni" type="number" value="1" id="in'+i+'"><div class="nbtn" onclick="changeItemNum('+i+',1)">+</div></div>'; h+='<button class="acb" '+(g.stock===0?'disabled':'')+' onclick="addToCartFromItem('+i+')">加入购物车</button></div></div>'; }); document.getElementById('gl').innerHTML=h||'<div style="text-align:center;padding:40px;color:#999;">没有找到药品</div>'; }
+function changeItemNum(i,d){ var input=document.getElementById('in'+i); if(!input) return; var v=parseInt(input.value)+d; if(isNaN(v)) v=1; if(v<1) v=1; if(v>goods[i].stock) v=goods[i].stock; input.value=v; }
+
+async function addToCartFromItem(i){
+  if(goods[i].stock===0){ st('已售罄'); return; }
+  if(!cu){ openModal('am'); return; }
+  var input=document.getElementById('in'+i); var q=parseInt(input?.value)||1;
+  if(q<1) q=1; if(q>goods[i].stock) q=goods[i].stock;
+  var specIdx = goods[i].specs ? getSelectedSpec(i) : (goods[i].defSpec || 0);
+  var token=localStorage.getItem('token');
+  await fetch(API+'/cart/add',{method:'POST',headers:{'Content-Type':'application/json','x-auth-token':token},body:JSON.stringify({productIndex:i,specIndex:specIdx,quantity:q})});
+  await syncServer(); st('已加入购物车');
+  if(document.getElementById('pc').style.display==='block') renderCart();
+}
+
+async function toggleSelectAll(){ var ch=document.getElementById('sa').checked; var token=localStorage.getItem('token'); for(var i=0;i<cart.length;i++){ if(cart[i].selected!==ch){ await fetch(API+'/cart/toggle/'+cart[i].id,{method:'PUT',headers:{'x-auth-token':token}}); } } await syncServer(); renderCart(); }
+async function toggleSelect(i){ var token=localStorage.getItem('token'); await fetch(API+'/cart/toggle/'+cart[i].id,{method:'PUT',headers:{'x-auth-token':token}}); await syncServer(); renderCart(); }
+async function removeCartItem(i){ var token=localStorage.getItem('token'); await fetch(API+'/cart/'+cart[i].id,{method:'DELETE',headers:{'x-auth-token':token}}); await syncServer(); renderCart(); }
+async function changeCartQty(i,d){ var c=cart[i]; var n=(c.quantity||1)+d; if(n<1) return; if(n>goods[c.productIndex].stock){ st('库存不足'); return; } var token=localStorage.getItem('token'); await fetch(API+'/cart/'+c.id,{method:'PUT',headers:{'Content-Type':'application/json','x-auth-token':token},body:JSON.stringify({quantity:n})}); await syncServer(); renderCart(); }
+
+function renderCart(){
+  var container=document.getElementById('cl'); var btn=document.getElementById('cob');
+  if(!cart.length){ container.innerHTML='<div style="text-align:center;padding:40px;color:#999;">购物车是空的</div>'; document.getElementById('ct').innerText='¥0.00'; btn.disabled=true; return; }
+  var h='',total=0,allSel=true,hasSel=false;
+  cart.forEach(function(c,i){
+    var g=goods[c.productIndex]; if(!g){ return; }
+    var p=getPrice(c.productIndex,c.specIndex), sn=getSpecName(c.productIndex,c.specIndex);
+    var sel=c.selected!==false; if(!sel) allSel=false; if(sel) hasSel=true;
+    var displayName = g.name + (sn ? ' ('+sn+')' : '');
+    h+='<div class="ci"><input type="checkbox" '+(sel?'checked':'')+' onclick="toggleSelect('+i+')"><img src="'+g.pic+'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"><div style="flex:1;"><div>'+displayName+'</div><div style="color:var(--p);font-weight:700;">¥'+(p*(c.quantity||1)).toFixed(2)+'</div></div><span onclick="removeCartItem('+i+')" style="color:#999;cursor:pointer;">删除</span><div style="display:flex;align-items:center;gap:6px;"><button class="btn" onclick="changeCartQty('+i+',-1)">-</button><span>'+(c.quantity||1)+'</span><button class="btn" onclick="changeCartQty('+i+',1)">+</button></div></div>';
+    if(sel) total+=p*(c.quantity||1);
+  });
+  container.innerHTML=h; document.getElementById('ct').innerText='¥'+total.toFixed(2);
+  document.getElementById('sa').checked=allSel&&cart.length>0; btn.disabled=!hasSel;
+}
+
+function cartToCheckout(){ if(!cu){ openModal('am'); return; } checkItems=cart.filter(function(c){return c.selected}); if(!checkItems.length){ st('请至少选择一件商品'); return; } if(!addresses.length){ if(confirm('您还没有收货地址，是否立即添加？')) openAddressManager(); return; } rasl(); openModal('asm'); }
+function selectAddress(idx){ closeModal('asm'); openModal('rm'); }
+function toPayAfterRisk(){ if(!document.getElementById('rcb').checked){ st('请勾选同意条款'); return; } closeModal('rm'); var payLoadTime = Math.floor(Math.random()*2000)+3000; sl('正在拉起支付，请稍候…',function(){ startPay(); }, payLoadTime); }
+function startPay(){ var total=0; checkItems.forEach(function(c){total+=getPrice(c.productIndex,c.specIndex)*(c.quantity||1)}); var discount=0; if(selCoupon){ var cp=couponList.find(function(c){return c.id===selCoupon}); if(cp && total >= cp.min) discount = cp.discount; else selCoupon=null; } document.getElementById('fp').innerText='¥'+(total-discount).toFixed(2); document.getElementById('pay').style.display='block'; var sec=30*60; updateCountdown(sec); clearInterval(payTimer); payTimer=setInterval(function(){ sec--; if(sec<=0){ clearInterval(payTimer); st('支付超时'); closePay(); } else updateCountdown(sec); },1000); }
+function updateCountdown(s){ var m=Math.floor(s/60),sec=s%60; document.getElementById('cdt').innerText='支付倒计时：'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
+function closePay(){ document.getElementById('pay').style.display='none'; clearInterval(payTimer); }
+function checkPayment(){ var btn = document.getElementById('payConfirmBtn'); if(btn.disabled) return; btn.disabled = true; paymentAttempt++; if(paymentAttempt === 1){ sl('正在查询支付结果…', function(){ st('未查询到支付，请再次查询'); btn.disabled = false; }, 5000); } else if(paymentAttempt === 2){ sl('正在查询支付结果…', function(){ goToSuccess(); btn.disabled = false; }, 4000); } }
+
+async function goToSuccess(){
+  clearInterval(payTimer);
+  var token=localStorage.getItem('token');
+  var res=await fetch(API+'/orders/create',{method:'POST',headers:{'x-auth-token':token}}).then(function(r){return r.json()});
+  if(res.msg) return st(res.msg);
+  closePay(); document.getElementById('soi').innerText='订单号：'+res.orderId; openModal('sp');
+  paymentAttempt = 0; checkItems=[]; selCoupon=null; await syncServer();
+}
+function backToHome(){ closeModal('sp'); switchTab('home'); }
+
+function openAddressManager(){ renderAddresses(); openModal('adm'); }
+function renderAddresses(){ var list=document.getElementById('al'); var h=''; addresses.forEach(function(a,i){ h+='<div class="fb" style="padding:12px 0;border-bottom:1px solid #f0f0f0;"><div><b>'+a.name+'</b> '+a.phone+'<br><span style="font-size:13px;color:#8c8c8c;">'+a.addr+'</span></div><div><span style="color:var(--p);cursor:pointer;margin-right:8px;" onclick="editAddress('+i+')">编辑</span><span style="color:#999;cursor:pointer;" onclick="deleteAddress('+i+')">删除</span></div></div>'; }); list.innerHTML=h||'<div style="text-align:center;color:#999;">暂无地址</div>'; }
+function editAddress(index){ document.getElementById('ei').value=index; if(index>=0){ var a=addresses[index]; document.getElementById('en').value=a.name; document.getElementById('ep').value=a.phone; document.getElementById('ea').value=a.addr; document.getElementById('aet').innerText='编辑地址'; } else { document.getElementById('en').value=''; document.getElementById('ep').value=''; document.getElementById('ea').value=''; document.getElementById('aet').innerText='新增地址'; } openModal('aem'); }
+async function saveAddress(){ var name=document.getElementById('en').value.trim(); var phone=document.getElementById('ep').value.trim(); var addr=document.getElementById('ea').value.trim(); if(!name||!phone||!addr){ st('请完整填写'); return; } var index=parseInt(document.getElementById('ei').value); var token=localStorage.getItem('token'); if(index>=0) addresses[index]={name:name,phone:phone,addr:addr}; else addresses.push({name:name,phone:phone,addr:addr}); await fetch(API+'/address',{method:'POST',headers:{'Content-Type':'application/json','x-auth-token':token},body:JSON.stringify({name:name,phone:phone,addr:addr})}); closeModal('aem'); renderAddresses(); }
+async function deleteAddress(i){ if(confirm('确定删除？')){ var token=localStorage.getItem('token'); await fetch(API+'/address/'+addresses[i].id,{method:'DELETE',headers:{'x-auth-token':token}}); addresses.splice(i,1); renderAddresses(); } }
+function rasl(){ var list=document.getElementById('asl'); var h=''; addresses.forEach(function(a,i){ h+='<div class="fb" style="padding:12px;border-bottom:1px solid #f0f0f0;cursor:pointer;" onclick="selectAddress('+i+')"><div><b>'+a.name+'</b> '+a.phone+'<br>'+a.addr+'</div><span style="color:var(--p);">选择</span></div>'; }); list.innerHTML=h; }
+
+function openCoupon(){ var t=0; cart.forEach(function(c){ if(c.selected) t+=getPrice(c.productIndex,c.specIndex)*(c.quantity||1); }); var h=''; couponList.forEach(function(cp){ var can=t>=cp.min,sel=selCoupon===cp.id; h+='<div class="coupon-item'+(sel?' selected':'')+(!can&&!sel?' disabled':'')+'" onclick="selectCoupon('+cp.id+','+can+','+sel+')"><div class="coupon-left"><span class="coupon-name">'+cp.name+'</span><span class="coupon-condition">满'+cp.min+'元可用</span></div><div class="coupon-right">减¥'+cp.discount+'</div></div>'; }); document.getElementById('cpl').innerHTML=t?h:'<div style="text-align:center;color:#999;padding:20px;">您还没有选中商品</div>'; openModal('cm'); }
+function selectCoupon(id,can,sel){ if(sel){ selCoupon=null; closeModal('cm'); st('已取消优惠券'); } else if(!can){ st('未达到使用条件'); } else { selCoupon=id; closeModal('cm'); st('已选择优惠券'); } }
+
+function filterOrders(filter){ curFilter=filter; document.querySelectorAll('#otabs .ot').forEach(function(el){el.classList.toggle('active',el.dataset.filter===filter)}); renderOrders(); }
+function renderOrders(){ 
+  var list=document.getElementById('ol'); 
+  var pending=orders.filter(function(o){return o.status==='daifahuo'}).length; 
+  document.getElementById('pb').innerText=pending; document.getElementById('pb').style.display=pending>0?'inline':'none'; 
+  var filtered=curFilter==='all'?orders:orders.filter(function(o){return o.status===curFilter});
+  if(!filtered.length){ list.innerHTML='<div style="text-align:center;color:#999;padding:20px;">暂无订单</div>'; return; } 
+  var h=''; 
+  filtered.forEach(function(o){ 
+    var itemList = (o.items||'').split(';').map(function(s){
+      var parts = s.split(',');
+      return goodsNames[parseInt(parts[0])] + ' x' + parts[2];
+    }).join('、');
+    h+='<div class="fb" style="padding:12px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;" onclick="showOrderDetail(\''+o.orderId+'\')"><div><div>'+itemList+'</div><div style="font-size:12px;color:#8c8c8c;">'+o.time+'</div></div><div style="color:var(--p);font-size:13px;">'+(statusMap[o.status]||o.status)+'</div><div style="font-weight:700;">¥'+o.price+'</div></div>'; 
+  }); 
+  list.innerHTML=h; 
+}
+function showOrderDetail(id){ 
+  var o=orders.find(function(o){return o.orderId===id}); 
+  if(!o) return; 
+  var itemList = (o.items||'').split(';').map(function(s){
+    var parts = s.split(',');
+    return goodsNames[parseInt(parts[0])] + ' x' + parts[2];
+  }).join('、');
+  document.getElementById('did').innerText=o.orderId; 
+  document.getElementById('dg').innerText=itemList; 
+  document.getElementById('dp').innerText='¥'+o.price; 
+  document.getElementById('ds').innerText=statusMap[o.status]||o.status; 
+  document.getElementById('dt').innerText=o.time; 
+  openModal('odm'); 
+}
+
+// ===== 客服功能 =====
+function openService(){ 
+  document.getElementById('sf').style.display='flex'; 
+  loadChatHistory();
+  chatPollTimer = setInterval(checkChatUpdates, 3000);
+}
+function closeService(){ 
+  document.getElementById('sf').style.display='none'; 
+  if(chatPollTimer) clearInterval(chatPollTimer);
+}
+function loadChatHistory(){
+  var token = localStorage.getItem('token');
+  if(!token) return;
+  fetch(API+'/chat',{headers:{'x-auth-token':token}}).then(function(r){return r.json()}).then(function(data){
+    var area = document.getElementById('ca');
+    var msgs = data.messages || [];
+    var online = data.online;
+    var h = '';
+    if(online){
+      document.getElementById('chatStatus').textContent = '药师在线';
+      document.getElementById('chatStatus').style.color = '#28a745';
+      h += '<div class="system-msg" style="color:#28a745;">药师在线</div>';
+    } else {
+      document.getElementById('chatStatus').textContent = '药师离线';
+      document.getElementById('chatStatus').style.color = '#999';
+      h += '<div class="system-msg">药师离线，您可以留言</div>';
+    }
+    if(online && !msgs.length){
+      h += '<div class="msg-bubble msg-pharmacist">您好，我是小杭药师，有什么可以帮您？</div>';
+    }
+    msgs.forEach(function(m){
+      if(m.fromUser){
+        h += '<div class="msg-bubble msg-user">'+m.message+'</div>';
+      } else {
+        h += '<div class="msg-bubble msg-pharmacist">'+m.message+'</div>';
+      }
+    });
+    area.innerHTML = h;
+    area.scrollTop = area.scrollHeight;
+  });
+}
+function checkChatUpdates(){
+  var token = localStorage.getItem('token');
+  fetch(API+'/chat',{headers:{'x-auth-token':token}}).then(function(r){return r.json()}).then(function(data){
+    var online = data.online;
+    if(online){
+      document.getElementById('chatStatus').textContent = '药师在线';
+      document.getElementById('chatStatus').style.color = '#28a745';
+    } else {
+      document.getElementById('chatStatus').textContent = '药师离线';
+      document.getElementById('chatStatus').style.color = '#999';
+    }
+    var area = document.getElementById('ca');
+    var currentMsgs = area.querySelectorAll('.msg-bubble');
+    var msgs = data.messages || [];
+    if(msgs.length > currentMsgs.length){
+      var h = '';
+      if(online){
+        h += '<div class="system-msg" style="color:#28a745;">药师在线</div>';
+      } else {
+        h += '<div class="system-msg">药师离线，您可以留言</div>';
+      }
+      msgs.forEach(function(m){
+        if(m.fromUser){
+          h += '<div class="msg-bubble msg-user">'+m.message+'</div>';
+        } else {
+          h += '<div class="msg-bubble msg-pharmacist">'+m.message+'</div>';
+        }
+      });
+      area.innerHTML = h;
+      area.scrollTop = area.scrollHeight;
+    }
+  });
+}
+function sendMsg(){
+  var input = document.getElementById('cinput');
+  var msg = input.value.trim();
+  if(!msg) return;
+  var token = localStorage.getItem('token');
+  var area = document.getElementById('ca');
+  area.innerHTML += '<div class="msg-bubble msg-user">'+msg+'</div>';
+  input.value = '';
+  area.scrollTop = area.scrollHeight;
+  fetch(API+'/chat/send',{method:'POST',headers:{'Content-Type':'application/json','x-auth-token':token},body:JSON.stringify({message:msg})})
+    .then(function(r){return r.json()})
+    .then(function(){
+      fetch(API+'/admin/online').then(function(r){return r.json()}).then(function(data){
+        if(!data.online){
+          setTimeout(function(){
+            var replies = ['药师暂时不在线，请留言，稍后上线会及时回复您。','当前咨询人数较多，药师忙线中，请您留言，我们会尽快处理。'];
+            area.innerHTML += '<div class="msg-bubble msg-pharmacist">'+replies[Math.floor(Math.random()*replies.length)]+'</div>';
+            area.scrollTop = area.scrollHeight;
+          }, 800);
+        }
+      });
+    });
+}
+
+function switchTab(tab){ hideLoader(); document.querySelectorAll('.ti').forEach(function(el,i){ el.classList.toggle('active',(tab==='home'&&i===0)||(tab==='cart'&&i===1)||(tab==='profile'&&i===2)); }); if(tab==='profile'){ sl('加载中...',function(){ document.getElementById('gl').style.display='none'; document.getElementById('pc').style.display='none'; document.getElementById('pp').style.display='block'; renderOrders(); },500); } else { document.getElementById('gl').style.display=(tab==='home')?'block':'none'; document.getElementById('pc').style.display=(tab==='cart')?'block':'none'; document.getElementById('pp').style.display='none'; if(tab==='cart') renderCart(); } }
+
+// ===== 自动登录 =====
+async function autoLogin(){
+  var token = localStorage.getItem('token');
+  var username = localStorage.getItem('username');
+  if(token && username){
+    cu = username;
+    await syncServer();
+    ual();
+  }
+}
+
+renderGoods(); upu();
+autoLogin().then(function(){
+  ucb();
+  document.getElementById('gl').style.display='block';
+  document.getElementById('pc').style.display='none';
+  document.getElementById('pp').style.display='none';
+  document.getElementById('cob').disabled=true;
+});
+</script>
+</body>
+</html>
